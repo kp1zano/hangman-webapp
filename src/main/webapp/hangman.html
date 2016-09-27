@@ -1,59 +1,44 @@
 <!doctype html>
 <head>
-<title>QuestionsAnswers</title>
-<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+    <title>Hangman</title>
+    <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
 </head>
 <body>
 
 
-
-<!--
-<div>:W <span id="pattern"></span></div>
+<div>Word: <span id="pattern"></span></div>
 <div>Guesses: <span id="oldGuesses"></span></div>
-<div>Letter? <input id="newGuesses" type="text" />
-             <button id="submit" onclick="guess()">Submit</button></div>
+<div><span id="prompt">Letter</span>?<input id="newGuesses" type="text" />
+                 <button id="submit">Submit</button></div>
 <div id="fail"></div>
--->
-
-<div><span id="pattern"></span></div>
-<input id="newGuesses" type="text"/>
-	<button id="submit" onclick="guess()">Submit</button></div>
-<span id="result"></span>
-
 
 
 <script>
-
 function guess() {
-  var pattern = $("#pattern").text();
+  var oldPattern = $("#pattern").text();
+  var oldGuesses = $("#oldGuesses").text();
   var newGuesses = $("#newGuesses").val();
-
-  $.get("/rest/testanswer", { question : pattern, answer : newGuesses },
-        function(newPattern) {
-          $("#result").text(newPattern);
-          $("#newGuesses").val("");
-          $("#pattern").focus();
-        })
-
+  $.get("/rest/match",
+                  { oldPattern: oldPattern, oldGuesses: oldGuesses, newGuesses: newGuesses },
+                          function(newPattern) {
+                                    $("#pattern").text(newPattern);
+                                    $("#oldGuesses").append(newGuesses);
+                                    $("#newGuesses").val("");
+                                    $("#newGuesses").focus();
+                                  })
    .fail(function(jqXHR, textStatus, errorThrown) {
-           $("#result").text("'"  + newGuesses + "' is not correct answer to '" + pattern + "'");
-         });
-
-   $.get("/rest/randomquestion", function(randomquestion){
-	$("#pattern").text(randomquestion);
-    });
-
+              $("#fail").text(textStatus + ": " + errorThrown);
+            });
 };
 
 $(function() {
-  $.get("/rest/randomquestion",
-        function(thestart) {
-          $("#pattern").text(thestart);
-          $("#submit").click(guess);
-          //$("#newGuesses").focus();
-        });
-});
-
+  $.get("/rest/start",
+                  function(thestart) {
+                            $("#pattern").text(thestart);
+                            $("#submit").click(guess);
+                            $("#newGuesses").focus();
+                          });
+});)
 </script>
 
 </body>
